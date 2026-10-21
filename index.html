@@ -1,1 +1,2283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Prank Wheel — ESL Challenge</title>
+    <style>
+        :root {
+            --bg-deep: #0b061d;
+            --bg-mid: #1a0d42;
+            --bg-glow: #391a82;
+            --gold-light: #fff3a1;
+            --gold-mid: #ffd000;
+            --gold-dark: #b57c00;
+            --red-light: #ff6b6b;
+            --red-mid: #ff2a2a;
+            --red-dark: #9e0000;
+            --card-bg: rgba(25, 14, 60, 0.94);
+            --font-main: 'Trebuchet MS', 'Arial Rounded MT Bold', 'Segoe UI', Roboto, Helvetica, sans-serif;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 35%, var(--bg-glow) 0%, var(--bg-mid) 45%, var(--bg-deep) 100%);
+            font-family: var(--font-main);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        /* Stage Spotlights & Starry Atmosphere */
+        .stage-lighting {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .spotlight {
+            position: absolute;
+            top: -15%;
+            width: 55vw;
+            height: 125vh;
+            /* Soft radial/conic gradient instead of heavy filter: blur(20px) */
+            background: radial-gradient(ellipse at 50% 0%, rgba(255, 238, 150, 0.16) 0%, rgba(164, 110, 255, 0.04) 55%, transparent 75%);
+            transform-origin: top center;
+            will-change: transform;
+        }
+
+        .spotlight.left {
+            left: -10%;
+            transform: rotate(-22deg);
+        }
+
+        .spotlight.right {
+            right: -10%;
+            transform: rotate(22deg);
+        }
+
+        .stage-stars {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                radial-gradient(2px 2px at 15% 20%, rgba(255,255,255,0.85) 50%, transparent 100%),
+                radial-gradient(2.5px 2.5px at 85% 15%, rgba(255,230,120,0.8) 50%, transparent 100%),
+                radial-gradient(2px 2px at 25% 75%, rgba(255,255,255,0.7) 50%, transparent 100%),
+                radial-gradient(3px 3px at 78% 68%, rgba(255,210,100,0.75) 50%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 50% 12%, rgba(255,255,255,0.9) 50%, transparent 100%),
+                radial-gradient(2px 2px at 10% 50%, rgba(255,230,150,0.7) 50%, transparent 100%),
+                radial-gradient(2px 2px at 92% 45%, rgba(255,255,255,0.75) 50%, transparent 100%);
+            opacity: 0.7;
+        }
+
+        /* Confetti Overlay Canvas */
+        #confettiCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 60;
+        }
+
+        /* Top Bar & Game-Show Header */
+        header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 18px;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .brand-banner {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .brand-title {
+            font-size: clamp(1.35rem, 3.2vw, 2.3rem);
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #ffe66d;
+            text-shadow: 0 3px 0 #5b2500, 0 5px 10px rgba(0,0,0,0.65);
+            line-height: 1.05;
+        }
+
+        .brand-subtitle {
+            font-size: clamp(0.75rem, 1.5vw, 1rem);
+            color: #d6c5ff;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .tool-btn {
+            appearance: none;
+            border: 2px solid rgba(255, 220, 110, 0.55);
+            background: linear-gradient(180deg, rgba(68, 41, 138, 0.9) 0%, rgba(36, 19, 82, 0.95) 100%);
+            color: #ffffff;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: clamp(0.8rem, 1.4vw, 0.95rem);
+            padding: 9px 14px;
+            border-radius: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 0 #150936, 0 6px 12px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.35);
+            transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+            min-height: 44px;
+        }
+
+        .tool-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #150936, 0 3px 6px rgba(0,0,0,0.4);
+        }
+
+        .tool-btn:focus-visible {
+            outline: 3px solid var(--gold-mid);
+            outline-offset: 2px;
+        }
+
+        .tool-btn.muted {
+            border-color: rgba(255, 110, 110, 0.65);
+            background: linear-gradient(180deg, rgba(110, 32, 55, 0.9) 0%, rgba(65, 15, 32, 0.95) 100%);
+        }
+
+        .badge-count {
+            background: var(--gold-mid);
+            color: #241000;
+            font-size: 0.78rem;
+            font-weight: 900;
+            padding: 2px 7px;
+            border-radius: 999px;
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.8);
+        }
+
+        /* Main Stage Container (Adapts to Portrait & Landscape) */
+        main.stage-main {
+            position: relative;
+            z-index: 5;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 16px 14px;
+            gap: 14px;
+            min-height: 0;
+        }
+
+        /* 2.5D Wheel Pedestal & Wrapper */
+        .wheel-stage-area {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            width: 100%;
+            min-height: 0;
+        }
+
+        .wheel-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Dynamic size calculated in JS for crisp fit, fallback CSS below */
+            width: min(74vw, 60vh);
+            height: min(74vw, 60vh);
+            max-width: 640px;
+            max-height: 640px;
+            min-width: 250px;
+            min-height: 250px;
+            border-radius: 50%;
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.72);
+        }
+
+        /* Subtle 2.5D Stage Floor Glow (Using pure gradient instead of filter:blur) */
+        .wheel-pedestal-glow {
+            position: absolute;
+            bottom: -18px;
+            width: 78%;
+            height: 32px;
+            background: radial-gradient(ellipse at center, rgba(255, 208, 0, 0.38) 0%, rgba(138, 66, 255, 0.15) 50%, transparent 75%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #wheelCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            position: relative;
+            z-index: 2;
+            will-change: transform;
+        }
+
+        /* Fixed Top 2.5D Pointer / Flapper */
+        .wheel-pointer-wrapper {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translate3d(-50%, 0, 0);
+            z-index: 8;
+            width: clamp(46px, 8vw, 66px);
+            height: clamp(56px, 9.5vw, 78px);
+            pointer-events: none;
+            transform-origin: 50% 14px;
+            transition: transform 0.055s ease-out;
+            will-change: transform;
+        }
+
+        /* Control Panel Area (Spin Button + Status Pill) */
+        .control-pod {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        /* Large Glossy 2.5D Arcade Spin Button */
+        .spin-button-outer {
+            padding: 6px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #fff4b8 0%, #ffb700 48%, #9c6300 100%);
+            box-shadow: 
+                0 10px 24px rgba(0, 0, 0, 0.75),
+                0 0 28px rgba(255, 65, 65, 0.55);
+            display: inline-block;
+        }
+
+        .spin-btn {
+            appearance: none;
+            border: none;
+            position: relative;
+            cursor: pointer;
+            border-radius: 999px;
+            padding: clamp(14px, 2.2vh, 22px) clamp(34px, 6vw, 62px);
+            font-family: inherit;
+            font-size: clamp(1.35rem, 3.2vw, 2.15rem);
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            color: #ffffff;
+            text-transform: uppercase;
+            text-shadow: 0 3px 0 #7a0000, 0 5px 10px rgba(0,0,0,0.6);
+            background: linear-gradient(180deg, #ff7b7b 0%, #ff1e1e 46%, #c90000 85%, #990000 100%);
+            box-shadow: 
+                0 8px 0 #6e0000,
+                inset 0 3px 3px rgba(255, 255, 255, 0.65),
+                inset 0 -4px 8px rgba(80, 0, 0, 0.6);
+            transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-width: 260px;
+        }
+
+        /* Glossy Top Highlight Reflection on Spin Button */
+        .spin-btn::before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 6%;
+            right: 6%;
+            height: 44%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.08) 100%);
+            border-radius: 999px;
+            pointer-events: none;
+        }
+
+        .spin-btn:hover:not(:disabled) {
+            filter: brightness(1.07);
+        }
+
+        .spin-btn:active:not(:disabled),
+        .spin-btn.pressed:not(:disabled) {
+            transform: translateY(6px);
+            box-shadow: 
+                0 2px 0 #6e0000,
+                inset 0 2px 3px rgba(255, 255, 255, 0.5),
+                inset 0 -2px 5px rgba(80, 0, 0, 0.7);
+        }
+
+        .spin-btn:disabled {
+            cursor: not-allowed;
+            filter: saturate(0.55) brightness(0.85);
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #4d0000, inset 0 2px 2px rgba(255,255,255,0.3);
+        }
+
+        .spin-btn:focus-visible {
+            outline: 4px solid #ffffff;
+            outline-offset: 4px;
+        }
+
+        .status-pill {
+            font-size: clamp(0.82rem, 1.5vw, 1rem);
+            color: #ffe89e;
+            background: rgba(15, 7, 38, 0.75);
+            border: 1px solid rgba(255, 215, 90, 0.35);
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        /* Landscape Layout Adjustments for Tablets & TVs */
+        @media (orientation: landscape) and (min-width: 680px) {
+            main.stage-main {
+                flex-direction: row;
+                justify-content: center;
+                gap: clamp(20px, 4vw, 56px);
+                padding: 4px 28px 16px;
+            }
+
+            .wheel-stage-area {
+                flex: 0 1 auto;
+                width: auto;
+            }
+
+            .control-pod {
+                max-width: 340px;
+            }
+        }
+
+        /* Modal Overlays (Result Card, Teacher Settings, Session History) */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 4, 24, 0.9);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* 2.5D Celebratory Result Card */
+        .result-card {
+            width: 100%;
+            max-width: 580px;
+            background: linear-gradient(180deg, #2b1466 0%, #16093b 100%);
+            border: 4px solid var(--gold-mid);
+            border-radius: 28px;
+            padding: clamp(20px, 3.5vh, 32px) clamp(18px, 3.5vw, 32px);
+            box-shadow: 
+                0 20px 50px rgba(0,0,0,0.85),
+                0 0 40px rgba(255, 208, 0, 0.35),
+                inset 0 2px 4px rgba(255, 255, 255, 0.35);
+            text-align: center;
+            position: relative;
+            transform: scale(0.82) translateY(20px);
+            transition: transform 0.32s cubic-bezier(0.22, 1.35, 0.42, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+
+        .modal-backdrop.open .result-card {
+            transform: scale(1) translateY(0);
+        }
+
+        .result-close-top {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-close-top:active {
+            transform: scale(0.92);
+        }
+
+        .result-badge-ribbon {
+            background: linear-gradient(90deg, #ff9900, #ffd000, #ff9900);
+            color: #2b1100;
+            font-weight: 900;
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+            padding: 5px 18px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+        }
+
+        .result-icon-bubble {
+            width: clamp(86px, 14vh, 118px);
+            height: clamp(86px, 14vh, 118px);
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #ffffff 0%, #ffe89e 45%, #ffae00 100%);
+            border: 4px solid #ffffff;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.5), 0 0 25px rgba(255, 215, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(3rem, 7vh, 4.4rem);
+            animation: bounceIcon 1.8s ease-in-out infinite;
+        }
+
+        @keyframes bounceIcon {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-7px) scale(1.05); }
+        }
+
+        .result-title {
+            font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ffe66d;
+            text-shadow: 0 3px 0 #572800, 0 6px 14px rgba(0,0,0,0.7);
+            line-height: 1.1;
+        }
+
+        .result-instruction {
+            font-size: clamp(1.2rem, 2.8vw, 1.7rem);
+            font-weight: 800;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.22);
+            padding: 16px 20px;
+            border-radius: 20px;
+            width: 100%;
+            line-height: 1.35;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.35);
+        }
+
+        /* Special Voluntary / No-Food Alternative Box for Sour Candy */
+        .voluntary-box {
+            width: 100%;
+            background: linear-gradient(180deg, rgba(20, 95, 70, 0.92) 0%, rgba(12, 62, 46, 0.96) 100%);
+            border: 2px solid #57f2aa;
+            border-radius: 18px;
+            padding: 12px 16px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+        }
+
+        .voluntary-header {
+            font-size: 0.95rem;
+            font-weight: 900;
+            color: #8affc7;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .voluntary-text {
+            font-size: 1.02rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.35;
+        }
+
+        .alt-btn {
+            align-self: flex-start;
+            appearance: none;
+            border: 2px solid #ffffff;
+            background: #ff9f1c;
+            color: #231000;
+            font-family: inherit;
+            font-weight: 900;
+            font-size: 0.92rem;
+            padding: 8px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #8a4e00;
+        }
+
+        .alt-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #8a4e00;
+        }
+
+        .result-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            margin-top: 6px;
+        }
+
+        .action-btn {
+            appearance: none;
+            border: none;
+            border-radius: 16px;
+            padding: 14px 26px;
+            font-family: inherit;
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            font-weight: 900;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 52px;
+            transition: transform 0.1s ease, filter 0.1s ease;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(180deg, #ff7070 0%, #ee1c1c 55%, #b30000 100%);
+            color: #ffffff;
+            border: 2px solid #ffcccc;
+            box-shadow: 0 6px 0 #660000, 0 8px 16px rgba(0,0,0,0.5);
+            flex: 1 1 200px;
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(180deg, #4f358e 0%, #2f1c5c 100%);
+            color: #ffffff;
+            border: 2px solid rgba(255,255,255,0.35);
+            box-shadow: 0 6px 0 #170b33, 0 8px 16px rgba(0,0,0,0.4);
+            flex: 0 1 auto;
+        }
+
+        .action-btn:active {
+            transform: translateY(4px);
+        }
+
+        /* Teacher Settings & Session History Drawer/Modal */
+        .panel-dialog {
+            width: 100%;
+            max-width: 780px;
+            max-height: 90vh;
+            background: var(--card-bg);
+            border: 3px solid var(--gold-mid);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.35);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .panel-title {
+            font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+            font-weight: 900;
+            color: var(--gold-mid);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-body {
+            padding: 18px 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .panel-footer {
+            padding: 14px 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        /* Settings Controls Grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .setting-label {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #ffe89e;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--gold-mid);
+            height: 28px;
+            cursor: pointer;
+        }
+
+        /* Challenge Editor Rows */
+        .challenge-list-editor {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .challenge-edit-row {
+            display: grid;
+            grid-template-columns: auto auto 1fr;
+            gap: 10px;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 10px 12px;
+            border-radius: 14px;
+        }
+
+        .challenge-edit-row.disabled-row {
+            opacity: 0.55;
+        }
+
+        .color-dot {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            border: 2px solid rgba(255,255,255,0.65);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+        }
+
+        .toggle-checkbox {
+            width: 26px;
+            height: 26px;
+            accent-color: #2ecc71;
+            cursor: pointer;
+        }
+
+        .challenge-inputs {
+            display: grid;
+            grid-template-columns: minmax(120px, 1fr) minmax(180px, 2fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 560px) {
+            .challenge-inputs {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .text-input {
+            width: 100%;
+            background: rgba(10, 5, 25, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            color: #ffffff;
+            padding: 8px 11px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.92rem;
+            font-weight: 700;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        .text-input:focus {
+            outline: 2px solid var(--gold-mid);
+            border-color: transparent;
+        }
+
+        /* History List */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.14);
+            padding: 10px 14px;
+            border-radius: 12px;
+            gap: 12px;
+        }
+
+        .history-item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-num {
+            background: rgba(255, 208, 0, 0.2);
+            color: var(--gold-mid);
+            font-weight: 900;
+            font-size: 0.82rem;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .history-time {
+            font-size: 0.8rem;
+            color: #cbb8ff;
+            font-weight: 700;
+        }
+
+        /* Inline Toast / Notification Banner */
+        .toast-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #ffd000;
+            color: #210e00;
+            font-weight: 900;
+            padding: 10px 20px;
+            border-radius: 999px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            z-index: 90;
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+
+        .toast-banner.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Reduced Motion Support */
+        @media (prefers-reduced-motion: reduce) {
+            .spotlight, .result-icon-bubble {
+                animation: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Stage Background Spotlights & Stars -->
+    <div class="stage-lighting" aria-hidden="true">
+        <div class="stage-stars"></div>
+        <div class="spotlight left"></div>
+        <div class="spotlight right"></div>
+    </div>
+
+    <!-- Lightweight Celebration Confetti Canvas -->
+    <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+    <!-- Top Game-Show Header & Teacher Controls -->
+    <header>
+        <div class="brand-banner">
+            <h1 class="brand-title">Prank Wheel</h1>
+            <span class="brand-subtitle">ESL Classroom Challenge</span>
+        </div>
+
+        <div class="top-controls" role="toolbar" aria-label="Classroom and Teacher Controls">
+            <button type="button" id="soundToggleBtn" class="tool-btn" aria-label="Toggle Sound Effects">
+                <span id="soundIcon">🔊</span>
+                <span id="soundLabel">Sound ON</span>
+            </button>
+
+            <button type="button" id="historyBtn" class="tool-btn" aria-label="Open Spin History">
+                <span>📜</span>
+                <span>History</span>
+                <span id="historyCountBadge" class="badge-count">0</span>
+            </button>
+
+            <button type="button" id="settingsBtn" class="tool-btn" aria-label="Open Teacher Settings">
+                <span>⚙️</span>
+                <span>Teacher</span>
+            </button>
+
+            <button type="button" id="fullscreenBtn" class="tool-btn" aria-label="Toggle Fullscreen Mode">
+                <span id="fullscreenIcon">⛶</span>
+                <span id="fullscreenLabel">Fullscreen</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Wheel & Spin Button Stage -->
+    <main class="stage-main">
+        <div class="wheel-stage-area">
+            <div class="wheel-container" id="wheelContainer">
+                <!-- Fixed Top 2.5D Gold/Red Pointer -->
+                <div class="wheel-pointer-wrapper" id="wheelPointer" aria-hidden="true">
+                    <svg viewBox="0 0 80 96" width="100%" height="100%">
+                        <defs>
+                            <linearGradient id="ptrGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#fff6b3"/>
+                                <stop offset="45%" stop-color="#ffcc00"/>
+                                <stop offset="100%" stop-color="#9e6300"/>
+                            </linearGradient>
+                            <linearGradient id="ptrRed" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#ff6b6b"/>
+                                <stop offset="50%" stop-color="#e60000"/>
+                                <stop offset="100%" stop-color="#7a0000"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Outer Gold Bezel -->
+                        <path d="M40 92 L10 26 A28 28 0 1 1 70 26 Z" fill="url(#ptrGold)" stroke="#ffffff" stroke-width="2.5"/>
+                        <!-- Inner Glossy Red Gem Body -->
+                        <path d="M40 82 L17 28 A21 21 0 1 1 63 28 Z" fill="url(#ptrRed)"/>
+                        <!-- Specular Highlight -->
+                        <ellipse cx="33" cy="22" rx="10" ry="6" fill="rgba(255,255,255,0.55)" transform="rotate(-18 33 22)"/>
+                        <!-- Center Pivot Stud -->
+                        <circle cx="40" cy="26" r="7" fill="url(#ptrGold)" stroke="#4a2c00" stroke-width="1.5"/>
+                    </svg>
+                </div>
+
+                <!-- Interactive 2.5D Wheel Canvas -->
+                <canvas id="wheelCanvas" aria-label="Spinning Challenge Wheel" role="img"></canvas>
+
+                <!-- Floor Pedestal Ambient Glow -->
+                <div class="wheel-pedestal-glow" aria-hidden="true"></div>
+            </div>
+        </div>
+
+        <!-- Spin Action Pod -->
+        <div class="control-pod">
+            <div class="spin-button-outer">
+                <button type="button" id="spinBtn" class="spin-btn" aria-label="Spin the wheel">
+                    <span>🎯</span>
+                    <span>SPIN THE WHEEL!</span>
+                </button>
+            </div>
+            <div class="status-pill" id="statusPill" aria-live="polite">
+                Ready! Tap <strong>SPIN THE WHEEL!</strong> to start!
+            </div>
+        </div>
+    </main>
+
+    <!-- Result Celebration Modal Overlay -->
+    <div class="modal-backdrop" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+        <div class="result-card">
+            <button type="button" class="result-close-top" id="closeResultTopBtn" aria-label="Close Result Card">✕</button>
+            <div class="result-badge-ribbon">🎉 CHALLENGE SELECTED! 🎉</div>
+            <div class="result-icon-bubble" id="resultIcon" aria-hidden="true">🐸</div>
+            <h2 class="result-title" id="resultTitle">FROG TIME</h2>
+            <p class="result-instruction" id="resultInstruction">Jump like a frog 5 times!</p>
+
+            <!-- Voluntary / No-Food Alternative Box (Shown automatically for SOUR CANDY) -->
+            <div class="voluntary-box" id="sourCandyBox" style="display: none;">
+                <div class="voluntary-header">
+                    <span>🍬</span>
+                    <span>100% Optional — Your Choice!</span>
+                </div>
+                <p class="voluntary-text" id="sourCandyAltText">
+                    No candy today? No problem! Do the <strong>No-Food Lemon Face Challenge</strong>: Pretend you bit a super sour lemon for 5 seconds! 🍋😝
+                </p>
+                <button type="button" class="alt-btn" id="useNoFoodAltBtn">
+                    🍋 Switch to No-Food Lemon Face!
+                </button>
+            </div>
+
+            <div class="result-actions">
+                <button type="button" class="action-btn primary" id="spinAgainBtn">
+                    <span>🔄</span>
+                    <span>SPIN AGAIN!</span>
+                </button>
+                <button type="button" class="action-btn secondary" id="closeResultBtn">
+                    <span>👍</span>
+                    <span>DONE / CLOSE</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Settings Modal -->
+    <div class="modal-backdrop" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+        <div class="panel-dialog">
+            <div class="panel-header">
+                <h2 class="panel-title" id="settingsModalTitle">⚙️ Teacher Controls & Challenge Editor</h2>
+                <button type="button" class="tool-btn" id="closeSettingsTopBtn" aria-label="Close Teacher Settings">✕ Close</button>
+            </div>
+
+            <div class="panel-body">
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label class="setting-label" for="spinDurationInput">
+                            ⏱️ Spin Duration: <span id="spinDurationLabel">5.0</span> seconds
+                        </label>
+                        <div class="setting-row">
+                            <input type="range" id="spinDurationInput" min="4" max="6" step="0.5" value="5">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <span class="setting-label">🔊 Classroom Audio & Repeat Prevention</span>
+                        <div class="setting-row" style="gap: 14px; flex-wrap: wrap; margin-top: 4px;">
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:700; font-size:0.9rem;">
+                                <input type="checkbox" id="settingsSoundCheck" class="toggle-checkbox" checked>
+                                Sound Effects
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:700; font-size:0.9rem;">
+                                <input type="checkbox" id="avoidRepeatCheck" class="toggle-checkbox" checked>
+                                Avoid Back-to-Back Repeat
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; flex-wrap:wrap; gap:8px;">
+                        <span class="setting-label">🎯 Wheel Segments (Uncheck to disable, or edit text below):</span>
+                        <span style="font-size:0.8rem; color:#d6c5ff;">At least 1 challenge must stay enabled</span>
+                    </div>
+                    <div class="challenge-list-editor" id="challengeEditorList">
+                        <!-- Dynamically populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <button type="button" class="tool-btn muted" id="resetDefaultsBtn">
+                    <span>⚠️</span>
+                    <span>Reset to Default Wheel</span>
+                </button>
+                <div style="display:flex; gap:10px;">
+                    <button type="button" class="action-btn primary" id="saveSettingsBtn" style="padding: 10px 22px; min-height: 44px; font-size: 1rem;">
+                        <span>💾</span>
+                        <span>Save & Close</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session History Modal -->
+    <div class="modal-backdrop" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+        <div class="panel-dialog" style="max-width: 560px;">
+            <div class="panel-header">
+                <h2 class="panel-title" id="historyModalTitle">📜 Session Spin History</h2>
+                <button type="button" class="tool-btn" id="closeHistoryTopBtn" aria-label="Close History">✕ Close</button>
+            </div>
+
+            <div class="panel-body">
+                <div id="historyListContainer" class="history-list">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <button type="button" class="tool-btn muted" id="clearHistoryBtn">
+                        <span>🗑️</span>
+                        <span id="clearHistoryText">Clear History</span>
+                    </button>
+                </div>
+                <button type="button" class="tool-btn" id="closeHistoryBottomBtn">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Non-blocking Classroom Notification Toast -->
+    <div class="toast-banner" id="toastBanner" role="status" aria-live="polite">Settings Saved!</div>
+
+    <script>
+        /**
+         * ============================================================================
+         * TEACHER CHALLENGE CONFIGURATION (EASY TO EDIT IN SOURCE CODE)
+         * ============================================================================
+         * Teachers can edit any `title`, `icon`, `instruction`, or `color` below
+         * without changing any wheel rendering or animation code.
+         */
+        const DEFAULT_CHALLENGES = [
+            {
+                id: 'sour-candy',
+                title: 'SOUR CANDY',
+                icon: '🍋',
+                instruction: 'If you want to, try one sour candy!',
+                isOptionalFood: true,
+                noFoodAlternative: 'Pretend you just bit a super sour lemon! Make your best sour lemon face for 5 seconds! 🍋😝',
+                color: '#f5b700', // Bright Lemon Gold
+                enabled: true
+            },
+            {
+                id: 'frog-time',
+                title: 'FROG TIME',
+                icon: '🐸',
+                instruction: 'Jump like a frog 5 times!',
+                color: '#29bf12', // Vibrant Frog Green
+                enabled: true
+            },
+            {
+                id: 'dance-time',
+                title: 'DANCE TIME',
+                icon: '💃',
+                instruction: 'Dance for 10 seconds!',
+                color: '#ff007f', // Hot Magenta
+                enabled: true
+            },
+            {
+                id: 'chicken-mode',
+                title: 'CHICKEN MODE',
+                icon: '🐔',
+                instruction: 'Act like a chicken for 10 seconds!',
+                color: '#ff6d00', // Tangerine Orange
+                enabled: true
+            },
+            {
+                id: 'sing',
+                title: 'SING!',
+                icon: '🎤',
+                instruction: 'Sing ‘Happy Birthday’ in English!',
+                color: '#8338ec', // Royal Purple
+                enabled: true
+            },
+            {
+                id: 'animal-sounds',
+                title: 'ANIMAL SOUNDS',
+                icon: '🐵',
+                instruction: 'Make 3 different animal sounds!',
+                color: '#00b4d8', // Sky Cyan
+                enabled: true
+            },
+            {
+                id: 'funny-face',
+                title: 'FUNNY FACE',
+                icon: '😜',
+                instruction: 'Make the funniest face you can!',
+                color: '#ffbe0b', // Sunshine Yellow
+                enabled: true
+            },
+            {
+                id: 'robot-walk',
+                title: 'ROBOT WALK',
+                icon: '🤖',
+                instruction: 'Walk like a robot for 10 seconds!',
+                color: '#3a86ff', // Electric Blue
+                enabled: true
+            },
+            {
+                id: 'slow-motion',
+                title: 'SLOW MOTION',
+                icon: '🏃',
+                instruction: 'Move in slow motion for 10 seconds!',
+                color: '#06d6a0', // Emerald Mint
+                enabled: true
+            },
+            {
+                id: 'tongue-twister',
+                title: 'TONGUE TWISTER',
+                icon: '💬',
+                instruction: 'Say ‘Red lorry, yellow lorry’ 3 times!',
+                color: '#ef476f', // Coral Red
+                enabled: true
+            },
+            {
+                id: 'team-challenge',
+                title: 'TEAM CHALLENGE',
+                icon: '🙌',
+                instruction: 'Choose a friend to do 5 jumping jacks with you!',
+                color: '#9b5de5', // Amethyst Violet
+                enabled: true
+            },
+            {
+                id: 'lucky-escape',
+                title: 'LUCKY ESCAPE',
+                icon: '⭐',
+                instruction: 'You’re safe! No challenge this time!',
+                color: '#118ab2', // Ocean Teal
+                enabled: true
+            }
+        ];
+
+        const STORAGE_KEY = 'prank_wheel_esl_state_v1';
+
+        // Application Runtime State
+        const state = {
+            challenges: JSON.parse(JSON.stringify(DEFAULT_CHALLENGES)),
+            spinDurationSec: 5.0,
+            soundEnabled: true,
+            avoidRepeat: true,
+            currentRotation: 0, // Radians; 0 means angle 0 is at 3 o'clock. Pointer is at top (-PI/2)
+            isSpinning: false,
+            lastWinnerId: null,
+            history: [],
+            bulbPhase: 0,
+            pointerKick: 0
+        };
+
+        // Web Audio API Synthesizer (100% Offline, No External Audio Files Needed)
+        class GameShowAudio {
+            constructor() {
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) {
+                        try {
+                            this.ctx = new AudioCtx();
+                        } catch (e) {
+                            this.ctx = null;
+                        }
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume().catch(() => {});
+                }
+            }
+
+            playTick(speedRatio = 0.5) {
+                if (!state.soundEnabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    // Crisp wooden/plastic peg click
+                    osc.type = 'triangle';
+                    const baseFreq = 520 + Math.min(350, speedRatio * 300);
+                    osc.frequency.setValueAtTime(baseFreq, now);
+                    osc.frequency.exponentialRampToValueAtTime(140, now + 0.038);
+
+                    gain.gain.setValueAtTime(0.22, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.038);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.04);
+                } catch (e) {
+                    // Fail silently if audio blocked
+                }
+            }
+
+            playWinFanfare(isLuckyEscape = false) {
+                if (!state.soundEnabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                try {
+                    const now = this.ctx.currentTime;
+                    const notes = isLuckyEscape
+                        ? [523.25, 659.25, 783.99, 1046.50, 1318.51] // Sparkling high C6 arpeggio
+                        : [523.25, 659.25, 783.99, 1046.50];         // Classic game-show C major fanfare
+
+                    notes.forEach((freq, idx) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        const startTime = now + idx * 0.11;
+                        const duration = idx === notes.length - 1 ? 0.55 : 0.18;
+
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, startTime);
+
+                        gain.gain.setValueAtTime(0.001, startTime);
+                        gain.gain.linearRampToValueAtTime(0.25, startTime + 0.02);
+                        gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+
+                        osc.start(startTime);
+                        osc.stop(startTime + duration + 0.02);
+                    });
+                } catch (e) {
+                    // Ignore audio errors
+                }
+            }
+        }
+
+        const soundFX = new GameShowAudio();
+
+        // Load saved configuration from localStorage with graceful fallback
+        function loadSavedSettings() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+
+                if (Array.isArray(parsed.challenges) && parsed.challenges.length === DEFAULT_CHALLENGES.length) {
+                    state.challenges = parsed.challenges.map((item, i) => ({
+                        ...DEFAULT_CHALLENGES[i],
+                        title: typeof item.title === 'string' && item.title.trim() ? item.title.trim() : DEFAULT_CHALLENGES[i].title,
+                        instruction: typeof item.instruction === 'string' && item.instruction.trim() ? item.instruction.trim() : DEFAULT_CHALLENGES[i].instruction,
+                        enabled: Boolean(item.enabled)
+                    }));
+                }
+
+                // Guarantee at least 1 enabled segment
+                if (!state.challenges.some(c => c.enabled)) {
+                    state.challenges[0].enabled = true;
+                }
+
+                if (typeof parsed.spinDurationSec === 'number' && parsed.spinDurationSec >= 4 && parsed.spinDurationSec <= 6) {
+                    state.spinDurationSec = parsed.spinDurationSec;
+                }
+                if (typeof parsed.soundEnabled === 'boolean') {
+                    state.soundEnabled = parsed.soundEnabled;
+                }
+                if (typeof parsed.avoidRepeat === 'boolean') {
+                    state.avoidRepeat = parsed.avoidRepeat;
+                }
+            } catch (e) {
+                // Local file storage might be restricted; continue with defaults
+            }
+        }
+
+        function saveSettingsToStorage() {
+            try {
+                const payload = {
+                    challenges: state.challenges,
+                    spinDurationSec: state.spinDurationSec,
+                    soundEnabled: state.soundEnabled,
+                    avoidRepeat: state.avoidRepeat
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+            } catch (e) {
+                // Graceful fallback if localStorage is disabled
+            }
+        }
+
+        function getEnabledChallenges() {
+            const active = state.challenges.filter(c => c.enabled);
+            return active.length > 0 ? active : [state.challenges[0]];
+        }
+
+        const wheelCanvas = document.getElementById('wheelCanvas');
+        const ctx = wheelCanvas.getContext('2d', { alpha: true });
+        const wheelContainer = document.getElementById('wheelContainer');
+        const wheelPointer = document.getElementById('wheelPointer');
+
+        // Offscreen Canvas Caches so we NEVER recompute gradients, text, or shadows during spin frames
+        const rotorCacheCanvas = document.createElement('canvas');
+        const rotorCacheCtx = rotorCacheCanvas.getContext('2d');
+
+        const staticOverlayCacheA = document.createElement('canvas');
+        const staticOverlayCacheB = document.createElement('canvas');
+
+        let cachedCanvasSize = 360;
+        let cachedDpr = 1;
+        let cacheDirty = true;
+
+        // Helper to lighten or darken hex colors for 2.5D bevel gradients
+        function shadeHexColor(hex, percent) {
+            let clean = hex.replace('#', '');
+            if (clean.length === 3) {
+                clean = clean.split('').map(c => c + c).join('');
+            }
+            const num = parseInt(clean, 16);
+            let r = (num >> 16) + Math.round(2.55 * percent);
+            let g = ((num >> 8) & 0x00FF) + Math.round(2.55 * percent);
+            let b = (num & 0x0000FF) + Math.round(2.55 * percent);
+
+            r = Math.max(0, Math.min(255, r));
+            g = Math.max(0, Math.min(255, g));
+            b = Math.max(0, Math.min(255, b));
+
+            return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+        // Responsive High-DPI Canvas Sizing (Capped at 1.5x DPR for buttery-smooth tablet GPU performance)
+        function resizeWheelCanvas() {
+            const headerEl = document.querySelector('header');
+            const podEl = document.querySelector('.control-pod');
+            const isLandscape = window.innerWidth >= 680 && window.innerWidth > window.innerHeight;
+
+            let availW = window.innerWidth - 32;
+            let availH = window.innerHeight - (headerEl ? headerEl.offsetHeight : 60) - 28;
+
+            if (isLandscape) {
+                availW = window.innerWidth - (podEl ? podEl.offsetWidth : 300) - 88;
+                availH = window.innerHeight - (headerEl ? headerEl.offsetHeight : 60) - 36;
+            } else {
+                availH = availH - (podEl ? podEl.offsetHeight : 120) - 24;
+            }
+
+            const size = Math.max(240, Math.min(600, Math.floor(Math.min(availW, availH))));
+            wheelContainer.style.width = size + 'px';
+            wheelContainer.style.height = size + 'px';
+
+            const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+            cachedCanvasSize = size;
+            cachedDpr = dpr;
+
+            wheelCanvas.width = Math.round(size * dpr);
+            wheelCanvas.height = Math.round(size * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            cacheDirty = true;
+            rebuildWheelCaches();
+            drawWheel();
+        }
+
+        // Draw 5-pointed star for the 3D center hub
+        function drawStarPath(context, cx, cy, spikes, outerRadius, innerRadius) {
+            let rot = (Math.PI / 2) * 3;
+            const step = Math.PI / spikes;
+            context.beginPath();
+            context.moveTo(cx, cy - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                let x = cx + Math.cos(rot) * outerRadius;
+                let y = cy + Math.sin(rot) * outerRadius;
+                context.lineTo(x, y);
+                rot += step;
+
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                context.lineTo(x, y);
+                rot += step;
+            }
+            context.lineTo(cx, cy - outerRadius);
+            context.closePath();
+        }
+
+        // Pre-renders the rotating segments once and the static rim/hub (for bulb phase 0 and 1) once
+        function rebuildWheelCaches() {
+            const size = cachedCanvasSize;
+            const dpr = cachedDpr;
+            const pixelSize = Math.round(size * dpr);
+
+            [rotorCacheCanvas, staticOverlayCacheA, staticOverlayCacheB].forEach(c => {
+                c.width = pixelSize;
+                c.height = pixelSize;
+            });
+
+            const cx = size / 2;
+            const cy = size / 2;
+            const outerRadius = (size / 2) - 8;
+            const rimWidth = Math.max(16, size * 0.055);
+            const wheelRadius = outerRadius - rimWidth;
+            const hubRadius = Math.max(30, size * 0.125);
+
+            // 1. Build Rotating Segments Cache (rotorCacheCanvas)
+            rotorCacheCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            rotorCacheCtx.clearRect(0, 0, size, size);
+            rotorCacheCtx.save();
+            rotorCacheCtx.translate(cx, cy);
+
+            const activeSegments = getEnabledChallenges();
+            const count = activeSegments.length;
+            const arc = (Math.PI * 2) / count;
+
+            for (let i = 0; i < count; i++) {
+                const seg = activeSegments[i];
+                const startAngle = i * arc;
+                const endAngle = startAngle + arc;
+                const midAngle = startAngle + arc / 2;
+
+                // Segment Rich Beveled Gradient
+                const segGrad = rotorCacheCtx.createRadialGradient(0, 0, hubRadius * 0.6, 0, 0, wheelRadius);
+                segGrad.addColorStop(0, shadeHexColor(seg.color, 22));
+                segGrad.addColorStop(0.65, seg.color);
+                segGrad.addColorStop(1, shadeHexColor(seg.color, -24));
+
+                rotorCacheCtx.beginPath();
+                rotorCacheCtx.moveTo(0, 0);
+                rotorCacheCtx.arc(0, 0, wheelRadius, startAngle, endAngle);
+                rotorCacheCtx.closePath();
+                rotorCacheCtx.fillStyle = segGrad;
+                rotorCacheCtx.fill();
+
+                // Glossy Inner Segment Bevel Highlight
+                rotorCacheCtx.beginPath();
+                rotorCacheCtx.moveTo(0, 0);
+                rotorCacheCtx.arc(0, 0, wheelRadius - 2, startAngle + 0.025, endAngle - 0.025);
+                rotorCacheCtx.closePath();
+                rotorCacheCtx.lineWidth = 3;
+                rotorCacheCtx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+                rotorCacheCtx.stroke();
+
+                // Gold Divider Spokes
+                rotorCacheCtx.beginPath();
+                rotorCacheCtx.moveTo(0, 0);
+                rotorCacheCtx.lineTo(Math.cos(startAngle) * wheelRadius, Math.sin(startAngle) * wheelRadius);
+                rotorCacheCtx.lineWidth = Math.max(2.5, size * 0.008);
+                rotorCacheCtx.strokeStyle = '#ffe57f';
+                rotorCacheCtx.stroke();
+
+                // Draw Challenge Icon & Bold Readable Title Along Radius
+                rotorCacheCtx.save();
+                rotorCacheCtx.rotate(midAngle);
+
+                const iconDist = wheelRadius * 0.78;
+                const iconFontSize = Math.max(18, Math.min(34, (wheelRadius * arc) * 0.42));
+                rotorCacheCtx.font = `${iconFontSize}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+                rotorCacheCtx.textAlign = 'center';
+                rotorCacheCtx.textBaseline = 'middle';
+                rotorCacheCtx.fillText(seg.icon, iconDist, 0);
+
+                // Challenge Title Text (Fast crisp outline instead of heavy shadowBlur)
+                const textDist = wheelRadius * 0.62;
+                const maxTextWidth = wheelRadius * 0.43;
+                const baseFontSize = Math.max(10, Math.min(17, size * 0.031));
+                rotorCacheCtx.font = `900 ${baseFontSize}px "Trebuchet MS", "Segoe UI", sans-serif`;
+                rotorCacheCtx.textAlign = 'right';
+                rotorCacheCtx.textBaseline = 'middle';
+                rotorCacheCtx.lineWidth = 3.2;
+                rotorCacheCtx.lineJoin = 'round';
+                rotorCacheCtx.strokeStyle = 'rgba(0, 0, 0, 0.78)';
+                rotorCacheCtx.fillStyle = '#ffffff';
+
+                const words = seg.title.split(' ');
+                if (words.length >= 2 && seg.title.length > 9 && count >= 8) {
+                    const midWord = Math.ceil(words.length / 2);
+                    const line1 = words.slice(0, midWord).join(' ');
+                    const line2 = words.slice(midWord).join(' ');
+                    const lineOffset = baseFontSize * 0.54;
+                    rotorCacheCtx.strokeText(line1, textDist, -lineOffset, maxTextWidth);
+                    rotorCacheCtx.fillText(line1, textDist, -lineOffset, maxTextWidth);
+                    rotorCacheCtx.strokeText(line2, textDist, lineOffset, maxTextWidth);
+                    rotorCacheCtx.fillText(line2, textDist, lineOffset, maxTextWidth);
+                } else {
+                    rotorCacheCtx.strokeText(seg.title, textDist, 0, maxTextWidth);
+                    rotorCacheCtx.fillText(seg.title, textDist, 0, maxTextWidth);
+                }
+
+                rotorCacheCtx.restore();
+
+                // Draw Pegs at Segment Boundaries on Inner Rim
+                const pegX = Math.cos(startAngle) * (wheelRadius - 2);
+                const pegY = Math.sin(startAngle) * (wheelRadius - 2);
+                rotorCacheCtx.beginPath();
+                rotorCacheCtx.arc(pegX, pegY, Math.max(3.5, size * 0.01), 0, Math.PI * 2);
+                rotorCacheCtx.fillStyle = '#ffffff';
+                rotorCacheCtx.fill();
+                rotorCacheCtx.lineWidth = 1.5;
+                rotorCacheCtx.strokeStyle = '#6b4400';
+                rotorCacheCtx.stroke();
+            }
+            rotorCacheCtx.restore();
+
+            // 2. Build Static Rim, Specular Sheen, Marquee Bulbs, and 3D Center Hub for Phase 0 and Phase 1
+            [0, 1].forEach(phase => {
+                const targetCanvas = phase === 0 ? staticOverlayCacheA : staticOverlayCacheB;
+                const sCtx = targetCanvas.getContext('2d');
+                sCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                sCtx.clearRect(0, 0, size, size);
+
+                // Outer Metallic Gold Rim Donut Ring
+                sCtx.save();
+                const rimGrad = sCtx.createRadialGradient(cx - size * 0.12, cy - size * 0.12, wheelRadius * 0.8, cx, cy, outerRadius);
+                rimGrad.addColorStop(0, '#fff5a8');
+                rimGrad.addColorStop(0.55, '#ffcc00');
+                rimGrad.addColorStop(0.88, '#b87700');
+                rimGrad.addColorStop(1, '#5e3800');
+
+                sCtx.beginPath();
+                sCtx.arc(cx, cy, outerRadius, 0, Math.PI * 2);
+                sCtx.arc(cx, cy, wheelRadius - 1, 0, Math.PI * 2, true);
+                sCtx.fillStyle = rimGrad;
+                sCtx.fill();
+
+                sCtx.beginPath();
+                sCtx.arc(cx, cy, outerRadius, 0, Math.PI * 2);
+                sCtx.lineWidth = 2.5;
+                sCtx.strokeStyle = 'rgba(255, 250, 210, 0.85)';
+                sCtx.stroke();
+                sCtx.restore();
+
+                // Inner Shadow Ring under the Gold Rim for 2.5D Depth
+                sCtx.save();
+                sCtx.beginPath();
+                sCtx.arc(cx, cy, wheelRadius, 0, Math.PI * 2);
+                sCtx.lineWidth = 5;
+                sCtx.strokeStyle = 'rgba(20, 8, 45, 0.55)';
+                sCtx.stroke();
+
+                // Top Glossy Specular Arc Across Upper Half of Wheel
+                const glossGrad = sCtx.createLinearGradient(cx, cy - wheelRadius, cx, cy);
+                glossGrad.addColorStop(0, 'rgba(255, 255, 255, 0.22)');
+                glossGrad.addColorStop(0.6, 'rgba(255, 255, 255, 0.04)');
+                glossGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                sCtx.beginPath();
+                sCtx.arc(cx, cy, wheelRadius - 2, Math.PI * 1.08, Math.PI * 1.92);
+                sCtx.quadraticCurveTo(cx, cy - wheelRadius * 0.15, cx + Math.cos(Math.PI * 1.08) * (wheelRadius - 2), cy + Math.sin(Math.PI * 1.08) * (wheelRadius - 2));
+                sCtx.fillStyle = glossGrad;
+                sCtx.fill();
+                sCtx.restore();
+
+                // Illuminated Marquee Bulbs Around Gold Outer Rim (Faux glow circle instead of expensive shadowBlur)
+                const bulbCount = 24;
+                const bulbOrbit = wheelRadius + rimWidth * 0.52;
+                const bulbRadius = Math.max(4, rimWidth * 0.24);
+
+                for (let b = 0; b < bulbCount; b++) {
+                    const angle = (b / bulbCount) * Math.PI * 2;
+                    const bx = cx + Math.cos(angle) * bulbOrbit;
+                    const by = cy + Math.sin(angle) * bulbOrbit;
+                    const isLit = (b + phase) % 2 === 0;
+
+                    if (isLit) {
+                        sCtx.beginPath();
+                        sCtx.arc(bx, by, bulbRadius * 1.9, 0, Math.PI * 2);
+                        sCtx.fillStyle = 'rgba(255, 238, 80, 0.38)';
+                        sCtx.fill();
+                    }
+
+                    sCtx.beginPath();
+                    sCtx.arc(bx, by, bulbRadius, 0, Math.PI * 2);
+                    sCtx.fillStyle = isLit ? '#fffbe0' : '#9e6b00';
+                    sCtx.fill();
+                    sCtx.lineWidth = 1.2;
+                    sCtx.strokeStyle = '#523300';
+                    sCtx.stroke();
+                }
+
+                // Raised 3D Center Hub with Gold Bezel & Star
+                sCtx.save();
+                sCtx.beginPath();
+                sCtx.arc(cx, cy + 4, hubRadius, 0, Math.PI * 2);
+                sCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                sCtx.fill();
+
+                const hubRimGrad = sCtx.createLinearGradient(cx - hubRadius, cy - hubRadius, cx + hubRadius, cy + hubRadius);
+                hubRimGrad.addColorStop(0, '#fff6b0');
+                hubRimGrad.addColorStop(0.5, '#ffbe00');
+                hubRimGrad.addColorStop(1, '#875200');
+                sCtx.beginPath();
+                sCtx.arc(cx, cy, hubRadius, 0, Math.PI * 2);
+                sCtx.fillStyle = hubRimGrad;
+                sCtx.fill();
+                sCtx.lineWidth = 2.5;
+                sCtx.strokeStyle = '#ffffff';
+                sCtx.stroke();
+
+                const domeRadius = hubRadius * 0.76;
+                const domeGrad = sCtx.createRadialGradient(cx - domeRadius * 0.3, cy - domeRadius * 0.3, domeRadius * 0.1, cx, cy, domeRadius);
+                domeGrad.addColorStop(0, '#ff7373');
+                domeGrad.addColorStop(0.55, '#d90429');
+                domeGrad.addColorStop(1, '#690011');
+                sCtx.beginPath();
+                sCtx.arc(cx, cy, domeRadius, 0, Math.PI * 2);
+                sCtx.fillStyle = domeGrad;
+                sCtx.fill();
+
+                drawStarPath(sCtx, cx, cy, 5, domeRadius * 0.66, domeRadius * 0.32);
+                const starGrad = sCtx.createLinearGradient(cx, cy - domeRadius * 0.6, cx, cy + domeRadius * 0.6);
+                starGrad.addColorStop(0, '#ffffff');
+                starGrad.addColorStop(0.4, '#ffe156');
+                starGrad.addColorStop(1, '#cc8400');
+                sCtx.fillStyle = starGrad;
+                sCtx.fill();
+                sCtx.restore();
+            });
+
+            cacheDirty = false;
+        }
+
+        // Ultra-fast Main 2.5D Wheel Renderer (Only 2 GPU bitmap drawImage calls per frame!)
+        function drawWheel() {
+            if (cacheDirty) {
+                rebuildWheelCaches();
+            }
+
+            const size = cachedCanvasSize;
+            const cx = size / 2;
+            const cy = size / 2;
+
+            ctx.clearRect(0, 0, size, size);
+
+            // 1. Draw rotated pre-rendered segments
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(state.currentRotation);
+            ctx.drawImage(rotorCacheCanvas, -cx, -cy, size, size);
+            ctx.restore();
+
+            // 2. Draw pre-rendered static rim, lights, and 3D hub on top
+            const overlay = state.bulbPhase === 0 ? staticOverlayCacheA : staticOverlayCacheB;
+            ctx.drawImage(overlay, 0, 0, size, size);
+        }
+
+        /**
+         * Determines which enabled segment is currently underneath the top pointer (-PI / 2).
+         */
+        function getSegmentIndexAtPointer(rotationRadians, segmentCount) {
+            const twoPi = Math.PI * 2;
+            const arc = twoPi / segmentCount;
+            const pointerAngle = (3 * Math.PI) / 2; // Top of the wheel (270 deg)
+            const relativeAngle = ((pointerAngle - (rotationRadians % twoPi)) + twoPi) % twoPi;
+            return Math.floor(relativeAngle / arc) % segmentCount;
+        }
+
+        // Smooth ease-out quintic curve with brief initial acceleration
+        function spinEaseProgress(t) {
+            // Smooth acceleration in first 12% and long thrilling deceleration
+            if (t < 0.12) {
+                const p = t / 0.12;
+                return 0.06 * (p * p);
+            } else {
+                const p = (t - 0.12) / 0.88;
+                return 0.06 + 0.94 * (1 - Math.pow(1 - p, 4));
+            }
+        }
+
+        // Start a Wheel Spin
+        function spinWheel() {
+            if (state.isSpinning) return;
+
+            const activeSegments = getEnabledChallenges();
+            const count = activeSegments.length;
+            if (count === 0) return;
+
+            // Close result modal if open
+            closeModal('resultModal');
+
+            state.isSpinning = true;
+            const spinBtn = document.getElementById('spinBtn');
+            const statusPill = document.getElementById('statusPill');
+            spinBtn.disabled = true;
+            statusPill.innerHTML = '🎡 <strong>Spinning... Good luck!</strong>';
+
+            // 1. Fairly and randomly choose winning segment (avoiding back-to-back repeat if enabled and >= 2 choices)
+            let candidateIndices = activeSegments.map((_, idx) => idx);
+            if (state.avoidRepeat && count >= 2 && state.lastWinnerId) {
+                const filtered = candidateIndices.filter(idx => activeSegments[idx].id !== state.lastWinnerId);
+                if (filtered.length > 0) {
+                    candidateIndices = filtered;
+                }
+            }
+
+            const chosenIndex = candidateIndices[Math.floor(Math.random() * candidateIndices.length)];
+            const chosenChallenge = activeSegments[chosenIndex];
+
+            // 2. Calculate exact target angle so the wheel stops comfortably inside the chosen segment (never on a boundary line)
+            const twoPi = Math.PI * 2;
+            const arc = twoPi / count;
+            const pointerAngle = (3 * Math.PI) / 2;
+
+            // Pick a safe landing offset within the segment (between 22% and 78% of the slice width)
+            const safeFraction = 0.22 + Math.random() * 0.56;
+            const targetSliceAngle = (chosenIndex + safeFraction) * arc;
+
+            // Desired final rotation modulo 2*PI so that (pointerAngle - finalRotation) == targetSliceAngle
+            const desiredModRotation = ((pointerAngle - targetSliceAngle) % twoPi + twoPi) % twoPi;
+            const currentModRotation = ((state.currentRotation % twoPi) + twoPi) % twoPi;
+
+            let deltaRotation = desiredModRotation - currentModRotation;
+            if (deltaRotation <= 0) {
+                deltaRotation += twoPi;
+            }
+
+            // Full rotations (between 6 and 9 full spins based on duration)
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const extraSpins = prefersReducedMotion ? 2 : (6 + Math.floor(Math.random() * 3));
+            const totalRotationDelta = (extraSpins * twoPi) + deltaRotation;
+
+            const startRotation = state.currentRotation;
+            const durationMs = prefersReducedMotion ? 1500 : state.spinDurationSec * 1000;
+            const startTime = performance.now();
+
+            let lastSegmentIdx = getSegmentIndexAtPointer(startRotation, count);
+            let lastBulbSwap = startTime;
+
+            function animateFrame(now) {
+                const elapsed = now - startTime;
+                const t = Math.min(1, elapsed / durationMs);
+                const eased = spinEaseProgress(t);
+
+                state.currentRotation = startRotation + totalRotationDelta * eased;
+
+                // Check if pointer crossed a segment peg for tick sound and flapper kick
+                const currentSegmentIdx = getSegmentIndexAtPointer(state.currentRotation, count);
+                if (currentSegmentIdx !== lastSegmentIdx) {
+                    lastSegmentIdx = currentSegmentIdx;
+                    const remainingRatio = 1 - t;
+                    soundFX.playTick(remainingRatio);
+
+                    // Visual kick on top pointer (GPU-accelerated translate3d)
+                    if (!prefersReducedMotion) {
+                        wheelPointer.style.transform = 'translate3d(-50%, 0, 0) rotate(-22deg)';
+                        clearTimeout(state.pointerKick);
+                        state.pointerKick = setTimeout(() => {
+                            wheelPointer.style.transform = 'translate3d(-50%, 0, 0) rotate(0deg)';
+                        }, 55);
+                    }
+                }
+
+                // Animate marquee rim bulbs
+                if (now - lastBulbSwap > 140) {
+                    state.bulbPhase = (state.bulbPhase + 1) % 2;
+                    lastBulbSwap = now;
+                }
+
+                drawWheel();
+
+                if (t < 1) {
+                    requestAnimationFrame(animateFrame);
+                } else {
+                    // Ensure exact final rotation and verify segment under pointer
+                    state.currentRotation = startRotation + totalRotationDelta;
+                    wheelPointer.style.transform = 'translate3d(-50%, 0, 0) rotate(0deg)';
+                    drawWheel();
+
+                    const finalVerifiedIdx = getSegmentIndexAtPointer(state.currentRotation, count);
+                    const winningChallenge = activeSegments[finalVerifiedIdx] || chosenChallenge;
+                    finishSpin(winningChallenge);
+                }
+            }
+
+            requestAnimationFrame(animateFrame);
+        }
+
+        // Handle Spin Completion & Trigger Celebration
+        function finishSpin(winner) {
+            state.isSpinning = false;
+            state.lastWinnerId = winner.id;
+
+            const spinBtn = document.getElementById('spinBtn');
+            const statusPill = document.getElementById('statusPill');
+            spinBtn.disabled = false;
+            statusPill.innerHTML = `🎉 Winner: <strong>${winner.icon} ${winner.title}</strong>!`;
+
+            // Record in session history
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            state.history.unshift({
+                title: winner.title,
+                icon: winner.icon,
+                instruction: winner.instruction,
+                time: timeStr
+            });
+            updateHistoryBadge();
+
+            // Play celebratory game-show fanfare
+            soundFX.playWinFanfare(winner.id === 'lucky-escape');
+
+            // Launch lightweight confetti burst
+            launchConfetti();
+
+            // Populate and display the Result Card Overlay
+            showResultCard(winner);
+        }
+
+        // Lightweight Canvas Confetti System
+        const confettiCanvas = document.getElementById('confettiCanvas');
+        const confettiCtx = confettiCanvas.getContext('2d');
+        let confettiParticles = [];
+        let confettiAnimId = null;
+
+        function resizeConfettiCanvas() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+
+        function launchConfetti() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            resizeConfettiCanvas();
+            const colors = ['#ffd000', '#ff2a85', '#00e5ff', '#29bf12', '#ff6d00', '#ffffff'];
+            confettiParticles = [];
+
+            // Reduced particle count (45) for smooth tablet frame rate
+            for (let i = 0; i < 45; i++) {
+                confettiParticles.push({
+                    x: window.innerWidth / 2 + (Math.random() - 0.5) * 180,
+                    y: window.innerHeight * 0.45 + (Math.random() - 0.5) * 80,
+                    vx: (Math.random() - 0.5) * 18,
+                    vy: -Math.random() * 16 - 5,
+                    size: 7 + Math.random() * 7,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    vRot: (Math.random() - 0.5) * 12,
+                    alpha: 1
+                });
+            }
+
+            if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+
+            function stepConfetti() {
+                confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+                let activeCount = 0;
+
+                for (let i = 0; i < confettiParticles.length; i++) {
+                    const p = confettiParticles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.42; // Gravity
+                    p.vx *= 0.985;
+                    p.rotation += p.vRot;
+
+                    if (p.y > confettiCanvas.height * 0.75) {
+                        p.alpha -= 0.03;
+                    }
+
+                    if (p.alpha > 0 && p.y < confettiCanvas.height + 30) {
+                        activeCount++;
+                        confettiCtx.save();
+                        confettiCtx.globalAlpha = Math.max(0, p.alpha);
+                        confettiCtx.translate(p.x, p.y);
+                        confettiCtx.rotate((p.rotation * Math.PI) / 180);
+                        confettiCtx.fillStyle = p.color;
+                        confettiCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
+                        confettiCtx.restore();
+                    }
+                }
+
+                if (activeCount > 0) {
+                    confettiAnimId = requestAnimationFrame(stepConfetti);
+                } else {
+                    confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+                    confettiAnimId = null;
+                }
+            }
+
+            confettiAnimId = requestAnimationFrame(stepConfetti);
+        }
+
+        // Show Result Overlay Card
+        function showResultCard(winner) {
+            document.getElementById('resultIcon').textContent = winner.icon;
+            document.getElementById('resultTitle').textContent = winner.title;
+            document.getElementById('resultInstruction').textContent = winner.instruction;
+
+            const sourCandyBox = document.getElementById('sourCandyBox');
+            const useNoFoodAltBtn = document.getElementById('useNoFoodAltBtn');
+
+            if (winner.id === 'sour-candy' || winner.isOptionalFood) {
+                sourCandyBox.style.display = 'flex';
+                useNoFoodAltBtn.style.display = 'inline-block';
+                useNoFoodAltBtn.onclick = () => {
+                    document.getElementById('resultInstruction').textContent =
+                        winner.noFoodAlternative || 'Pretend you bit a super sour lemon for 5 seconds! 🍋😝';
+                    useNoFoodAltBtn.style.display = 'none';
+                };
+            } else {
+                sourCandyBox.style.display = 'none';
+            }
+
+            openModal('resultModal');
+        }
+
+        // Modal Helpers
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('open');
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('open');
+        }
+
+        function closeAllModals() {
+            ['resultModal', 'settingsModal', 'historyModal'].forEach(closeModal);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastBanner');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2200);
+        }
+
+        // Sound UI Sync
+        function updateSoundButtonUI() {
+            const btn = document.getElementById('soundToggleBtn');
+            const icon = document.getElementById('soundIcon');
+            const label = document.getElementById('soundLabel');
+            const check = document.getElementById('settingsSoundCheck');
+
+            if (state.soundEnabled) {
+                btn.classList.remove('muted');
+                icon.textContent = '🔊';
+                label.textContent = 'Sound ON';
+            } else {
+                btn.classList.add('muted');
+                icon.textContent = '🔇';
+                label.textContent = 'Sound OFF';
+            }
+            if (check) check.checked = state.soundEnabled;
+        }
+
+        // Render Teacher Challenge Editor List
+        function renderTeacherSettingsEditor() {
+            document.getElementById('spinDurationInput').value = state.spinDurationSec;
+            document.getElementById('spinDurationLabel').textContent = state.spinDurationSec.toFixed(1);
+            document.getElementById('settingsSoundCheck').checked = state.soundEnabled;
+            document.getElementById('avoidRepeatCheck').checked = state.avoidRepeat;
+
+            const container = document.getElementById('challengeEditorList');
+            container.innerHTML = '';
+
+            state.challenges.forEach((ch, index) => {
+                const row = document.createElement('div');
+                row.className = 'challenge-edit-row' + (ch.enabled ? '' : ' disabled-row');
+
+                // Checkbox to enable/disable segment
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'toggle-checkbox';
+                checkbox.checked = ch.enabled;
+                checkbox.setAttribute('aria-label', `Enable ${ch.title}`);
+
+                checkbox.addEventListener('change', () => {
+                    const enabledCount = state.challenges.filter(c => c.enabled).length;
+                    if (!checkbox.checked && enabledCount <= 1) {
+                        checkbox.checked = true;
+                        showToast('At least 1 challenge must stay enabled!');
+                        return;
+                    }
+                    ch.enabled = checkbox.checked;
+                    row.classList.toggle('disabled-row', !ch.enabled);
+                    cacheDirty = true;
+                    drawWheel();
+                });
+
+                // Color + Emoji badge
+                const badge = document.createElement('div');
+                badge.className = 'color-dot';
+                badge.style.backgroundColor = ch.color;
+                badge.textContent = ch.icon;
+
+                // Title & Instruction Inputs
+                const inputsDiv = document.createElement('div');
+                inputsDiv.className = 'challenge-inputs';
+
+                const titleInput = document.createElement('input');
+                titleInput.type = 'text';
+                titleInput.className = 'text-input';
+                titleInput.value = ch.title;
+                titleInput.maxLength = 26;
+                titleInput.placeholder = 'Challenge Title';
+                titleInput.setAttribute('aria-label', `Challenge ${index + 1} Title`);
+                titleInput.addEventListener('input', () => {
+                    ch.title = titleInput.value.trim() || DEFAULT_CHALLENGES[index].title;
+                    cacheDirty = true;
+                    drawWheel();
+                });
+
+                const instInput = document.createElement('input');
+                instInput.type = 'text';
+                instInput.className = 'text-input';
+                instInput.value = ch.instruction;
+                instInput.maxLength = 110;
+                instInput.placeholder = 'English Instruction';
+                instInput.setAttribute('aria-label', `Challenge ${index + 1} Instruction`);
+                instInput.addEventListener('input', () => {
+                    ch.instruction = instInput.value.trim() || DEFAULT_CHALLENGES[index].instruction;
+                });
+
+                inputsDiv.appendChild(titleInput);
+                inputsDiv.appendChild(instInput);
+
+                row.appendChild(checkbox);
+                row.appendChild(badge);
+                row.appendChild(inputsDiv);
+                container.appendChild(row);
+            });
+        }
+
+        // Session Spin History Rendering & Inline Confirmation
+        let clearConfirmPending = false;
+
+        function updateHistoryBadge() {
+            document.getElementById('historyCountBadge').textContent = state.history.length;
+        }
+
+        function renderHistoryList() {
+            const container = document.getElementById('historyListContainer');
+            container.innerHTML = '';
+            clearConfirmPending = false;
+            document.getElementById('clearHistoryText').textContent = 'Clear History';
+
+            if (state.history.length === 0) {
+                const empty = document.createElement('div');
+                empty.style.textAlign = 'center';
+                empty.style.padding = '24px';
+                empty.style.color = '#d6c5ff';
+                empty.style.fontWeight = '700';
+                empty.textContent = 'No spins yet in this session! Spin the wheel to begin.';
+                container.appendChild(empty);
+                return;
+            }
+
+            state.history.forEach((item, idx) => {
+                const row = document.createElement('div');
+                row.className = 'history-item';
+
+                const left = document.createElement('div');
+                left.className = 'history-item-left';
+
+                const num = document.createElement('span');
+                num.className = 'history-num';
+                num.textContent = `#${state.history.length - idx}`;
+
+                const iconSpan = document.createElement('span');
+                iconSpan.style.fontSize = '1.5rem';
+                iconSpan.textContent = item.icon;
+
+                const textWrap = document.createElement('div');
+                const titleEl = document.createElement('div');
+                titleEl.style.fontWeight = '900';
+                titleEl.style.color = '#ffe66d';
+                titleEl.textContent = item.title;
+
+                const instEl = document.createElement('div');
+                instEl.style.fontSize = '0.88rem';
+                instEl.style.color = '#ffffff';
+                instEl.textContent = item.instruction;
+
+                textWrap.appendChild(titleEl);
+                textWrap.appendChild(instEl);
+
+                left.appendChild(num);
+                left.appendChild(iconSpan);
+                left.appendChild(textWrap);
+
+                const timeEl = document.createElement('span');
+                timeEl.className = 'history-time';
+                timeEl.textContent = item.time;
+
+                row.appendChild(left);
+                row.appendChild(timeEl);
+                container.appendChild(row);
+            });
+        }
+
+        // Event Listeners Setup
+        function initEventListeners() {
+            // Spin Triggers
+            document.getElementById('spinBtn').addEventListener('click', spinWheel);
+            document.getElementById('spinAgainBtn').addEventListener('click', spinWheel);
+
+            // Result Modal Close Buttons
+            document.getElementById('closeResultBtn').addEventListener('click', () => closeModal('resultModal'));
+            document.getElementById('closeResultTopBtn').addEventListener('click', () => closeModal('resultModal'));
+
+            // Sound Toggle Button
+            document.getElementById('soundToggleBtn').addEventListener('click', () => {
+                state.soundEnabled = !state.soundEnabled;
+                updateSoundButtonUI();
+                saveSettingsToStorage();
+                if (state.soundEnabled) soundFX.playTick(0.8);
+            });
+
+            // Teacher Settings Modal
+            document.getElementById('settingsBtn').addEventListener('click', () => {
+                if (state.isSpinning) return;
+                renderTeacherSettingsEditor();
+                openModal('settingsModal');
+            });
+
+            document.getElementById('closeSettingsTopBtn').addEventListener('click', () => {
+                saveSettingsToStorage();
+                closeModal('settingsModal');
+            });
+
+            document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+                saveSettingsToStorage();
+                cacheDirty = true;
+                drawWheel();
+                closeModal('settingsModal');
+                showToast('Settings Saved!');
+            });
+
+            document.getElementById('spinDurationInput').addEventListener('input', (e) => {
+                state.spinDurationSec = parseFloat(e.target.value) || 5.0;
+                document.getElementById('spinDurationLabel').textContent = state.spinDurationSec.toFixed(1);
+            });
+
+            document.getElementById('settingsSoundCheck').addEventListener('change', (e) => {
+                state.soundEnabled = e.target.checked;
+                updateSoundButtonUI();
+            });
+
+            document.getElementById('avoidRepeatCheck').addEventListener('change', (e) => {
+                state.avoidRepeat = e.target.checked;
+            });
+
+            // Reset to Default Configuration (with inline confirmation on double tap)
+            let resetConfirmPending = false;
+            const resetBtn = document.getElementById('resetDefaultsBtn');
+            resetBtn.addEventListener('click', () => {
+                if (!resetConfirmPending) {
+                    resetConfirmPending = true;
+                    resetBtn.innerHTML = '<span>❓</span><span>Tap Again to Confirm Reset</span>';
+                    setTimeout(() => {
+                        resetConfirmPending = false;
+                        resetBtn.innerHTML = '<span>⚠️</span><span>Reset to Default Wheel</span>';
+                    }, 3000);
+                    return;
+                }
+                resetConfirmPending = false;
+                resetBtn.innerHTML = '<span>⚠️</span><span>Reset to Default Wheel</span>';
+                state.challenges = JSON.parse(JSON.stringify(DEFAULT_CHALLENGES));
+                state.spinDurationSec = 5.0;
+                state.soundEnabled = true;
+                state.avoidRepeat = true;
+                saveSettingsToStorage();
+                updateSoundButtonUI();
+                renderTeacherSettingsEditor();
+                cacheDirty = true;
+                drawWheel();
+                showToast('Wheel Reset to Defaults!');
+            });
+
+            // Session History Modal
+            document.getElementById('historyBtn').addEventListener('click', () => {
+                renderHistoryList();
+                openModal('historyModal');
+            });
+
+            document.getElementById('closeHistoryTopBtn').addEventListener('click', () => closeModal('historyModal'));
+            document.getElementById('closeHistoryBottomBtn').addEventListener('click', () => closeModal('historyModal'));
+
+            document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+                if (state.history.length === 0) return;
+                const clearText = document.getElementById('clearHistoryText');
+                if (!clearConfirmPending) {
+                    clearConfirmPending = true;
+                    clearText.textContent = 'Tap Again to Confirm Clear';
+                    return;
+                }
+                state.history = [];
+                clearConfirmPending = false;
+                updateHistoryBadge();
+                renderHistoryList();
+                showToast('Session History Cleared!');
+            });
+
+            // Fullscreen Button with Graceful Fallback
+            const fsBtn = document.getElementById('fullscreenBtn');
+            fsBtn.addEventListener('click', () => {
+                const docEl = document.documentElement;
+                const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+
+                if (!isFs) {
+                    const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen;
+                    if (req) {
+                        req.call(docEl).catch(() => {
+                            showToast('Fullscreen is not supported on this browser.');
+                        });
+                    } else {
+                        showToast('Fullscreen is not available on this device.');
+                    }
+                } else {
+                    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+                    if (exit) exit.call(document).catch(() => {});
+                }
+            });
+
+            document.addEventListener('fullscreenchange', () => {
+                const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+                document.getElementById('fullscreenLabel').textContent = isFs ? 'Exit Full' : 'Fullscreen';
+                resizeWheelCanvas();
+            });
+
+            // Close modal when clicking backdrop outside card
+            ['resultModal', 'settingsModal', 'historyModal'].forEach(modalId => {
+                const backdrop = document.getElementById(modalId);
+                backdrop.addEventListener('click', (e) => {
+                    if (e.target === backdrop) {
+                        closeModal(modalId);
+                    }
+                });
+            });
+
+            // Keyboard Accessibility (Escape closes modals; Space/Enter spins when focused)
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeAllModals();
+                }
+            });
+
+            // Responsive Resize Handling
+            window.addEventListener('resize', () => {
+                resizeWheelCanvas();
+                resizeConfettiCanvas();
+            });
+        }
+
+        // Initialize Application on Window Load
+        window.onload = function () {
+            loadSavedSettings();
+            updateSoundButtonUI();
+            initEventListeners();
+            resizeWheelCanvas();
+        };
+    </script>
+</body>
+</html>
